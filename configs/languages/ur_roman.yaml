@@ -1,0 +1,49 @@
+language: "ur_roman"
+display_name: "Roman Urdu"
+
+cleaning:
+  lowercase: true
+  strip_urls: true
+  strip_mentions: true
+  strip_hashtags: false           # Keep hashtag text, strip the '#' symbol only
+  strip_html_entities: true
+  strip_control_characters: true  # Removes \r, \u200e, \u200f, \u202a etc.
+  strip_emojis_from_vocab: true   # Emojis become separate <EMOJI> tokens, excluded from word freq
+  separate_punctuation: true      # "theek?" -> "theek ?"
+  preserve_raw_tokens: true       # Always store original before any transform
+
+  # Elongation squashing:
+  # Runs of >= 3 consecutive identical characters are reduced to exactly 2.
+  # Rationale: Roman Urdu has meaningful double-letters (accha, abb, challo),
+  # so collapsing to 1 would corrupt valid spellings. Collapsing to 2 preserves
+  # candidates for the phonetic+dictionary stages to resolve further.
+  max_consecutive_char_repeat: 2  # 'boooohat' -> 'boohat', 'accccha' -> 'accha'
+
+tokenization:
+  # Primary split: matches Latin/Urdu-script alphanumeric runs OR individual non-whitespace symbols.
+  # This ensures punctuation is never glued to words.
+  token_pattern: "[A-Za-z0-9\u0600-\u06FF]+"   # word tokens (Latin + Arabic/Urdu script)
+  punct_pattern: "[^\\w\\s]"                     # any non-word non-space char is a punct token
+
+  # Tokens entirely made of punctuation are tagged is_punct=True
+  # Tokens entirely made of digits are tagged is_numeric=True
+  # Tokens that are emojis are tagged is_emoji=True
+
+  min_token_length: 1             # keep single characters (e.g. "k", "o" are valid Roman Urdu)
+  drop_stopwords_from_vocab: false # Keep everything at raw stage; stopwords filtered during analysis
+  language_code: "ur"             # ISO 639-1; used for future stanza/polyglot integration
+
+special_tokens:
+  url: "<URL>"
+  mention: "<MENTION>"
+  emoji_placeholder: "<EMOJI>"    # emojis replaced with this in clean_token only; raw_token preserved
+  numeric: "<NUM>"                # optional: replace digit sequences in clean_token
+
+arabic_script_handling:
+  action: "flag"           # Options: flag | strip | keep
+  # 'flag': Urdu/Arabic-script tokens tagged is_arabic_script=True; kept in raw_token
+  # This lets us study code-mixing at the script level without destroying the data
+
+english_handling:
+  action: "keep"           # English words are valid in Roman Urdu code-mixed text
+  # They will be passed to Stage 1 (Dictionary) which skips words that are known English

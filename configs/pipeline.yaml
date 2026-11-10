@@ -1,0 +1,32 @@
+# Pipeline & Data Source Configuration for RUNorm
+
+sources:
+  - source_name: "rudasa_final_merged"
+    path: "RUDASA/Final_merged.csv"
+    text_column: "Message"
+    is_whatsapp_split: false
+    description: "Multi-attribute annotated RUDaSA dataset (daily, informal domain)"
+
+  - source_name: "rudasa_anonymized_84k"
+    path: "RUDASA/anonymized_84k_for_labeling.csv"
+    text_column: "message"
+    is_whatsapp_split: false
+    description: "84k anonymized sentences curated for labeling"
+
+  - source_name: "whatsapp_data_1"
+    path: "RUDASA/whatsapp_data__1_labeled.csv"
+    text_column: null
+    is_whatsapp_split: true
+    description: "WhatsApp extracted chat data with unescaped comma shifts handled"
+
+  - source_name: "whatsapp_others_cleaned"
+    path: "RUDASA/whatsapp_others_cleaned.csv"
+    text_column: "message"
+    is_whatsapp_split: false
+    description: "Cleaned supplementary WhatsApp messages"
+
+# Note: RUDASA/for__negative_samples.csv is excluded from the raw training merge 
+# per user instruction; it contains foreign (Indonesian) tweets and will be held out for benchmarking.
+
+output:
+  interim_merged_csv: "data/interim/raw_merged.csv"
